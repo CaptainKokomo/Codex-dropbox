@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "lib": ["DOM", "DOM.Iterable", "ES2021"],
+    "allowJs": false,
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "baseUrl": "./",
+    "paths": {
+      "@shared/*": ["shared/*"],
+      "@state/*": ["renderer/src/state/*"],
+      "@components/*": ["renderer/src/components/*"],
+      "@data/*": ["renderer/src/data/*"],
+      "@hooks/*": ["renderer/src/hooks/*"],
+      "@utils/*": ["renderer/src/utils/*"],
+      "@canvas/*": ["renderer/src/canvas/*"]
+    }
+  },
+  "include": ["electron", "renderer", "shared"],
+  "exclude": ["dist", "node_modules"]
+}

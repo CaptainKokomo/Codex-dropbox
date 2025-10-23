@@ -1,0 +1,35 @@
+{
+  "appId": "com.nodelab.app",
+  "productName": "NodeLab",
+  "files": [
+    "dist/main/**/*",
+    "dist/renderer/**/*",
+    "package.json"
+  ],
+  "directories": {
+    "output": "release"
+  },
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      },
+      {
+        "target": "portable",
+        "arch": ["x64"]
+      }
+    ],
+    "artifactName": "NodeLab-${version}-${arch}.${ext}"
+  },
+  "nsis": {
+    "oneClick": true,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": false,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true
+  },
+  "portable": {
+    "artifactName": "NodeLab-Portable-${version}-${arch}.exe"
+  }
+}
