@@ -19,10 +19,10 @@
         "target": "portable",
         "arch": ["x64"]
       }
-    ],
-    "artifactName": "NodeLab-${version}-${arch}.${ext}"
+    ]
   },
   "nsis": {
+    "artifactName": "NodeLab-Setup.${ext}",
     "oneClick": true,
     "perMachine": false,
     "allowToChangeInstallationDirectory": false,
@@ -30,6 +30,6 @@
     "createStartMenuShortcut": true
   },
   "portable": {
-    "artifactName": "NodeLab-Portable-${version}-${arch}.exe"
+    "artifactName": "NodeLab.exe"
   }
 }

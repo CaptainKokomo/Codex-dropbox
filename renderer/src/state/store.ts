@@ -6,7 +6,6 @@ import type {
   CircuitComponent,
   CircuitProject,
   GamifiedProgress,
-  NodeLabActions,
   NodeLabState,
   NodeLabStore,
   WireConnection
