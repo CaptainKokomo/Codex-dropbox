@@ -3,17 +3,8 @@ import { missions } from '@data/missions';
 import { useNodeLabStore } from '@state/store';
 
 export function useGamifiedTutorial() {
-  const {
-    gamifiedProgress,
-    updateGamifiedProgress,
-    diagnostics,
-    simulation,
-    showTips
-  } = useNodeLabStore((state) => ({
+  const { gamifiedProgress, showTips } = useNodeLabStore((state) => ({
     gamifiedProgress: state.gamifiedProgress,
-    updateGamifiedProgress: state.updateGamifiedProgress,
-    diagnostics: state.diagnostics,
-    simulation: state.simulation,
     showTips: state.showTips
   }));
 
@@ -25,35 +16,51 @@ export function useGamifiedTutorial() {
   }, [gamifiedProgress.activeMissionId]);
 
   useEffect(() => {
-    if (!activeMission) return;
+    const evaluateMissionProgress = () => {
+      const state = useNodeLabStore.getState();
+      const progress = state.gamifiedProgress;
 
-    const currentProjectState = useNodeLabStore.getState();
+      const mission = progress.activeMissionId
+        ? missions.find((item) => item.id === progress.activeMissionId) ?? missions[0]
+        : missions[0];
 
-    const completedSteps = gamifiedProgress.stepCompleted[activeMission.id] ?? [];
-    const nextStep = activeMission.steps.find((step) => !completedSteps.includes(step.id));
+      if (!mission) {
+        return;
+      }
 
-    if (!nextStep) {
-      if (!gamifiedProgress.completedMissions.includes(activeMission.id)) {
-        updateGamifiedProgress({
-          completedMissions: [...gamifiedProgress.completedMissions, activeMission.id],
-          experience: gamifiedProgress.experience + 50,
-          level: Math.floor((gamifiedProgress.experience + 50) / 100) + 1,
-          activeMissionId: findNextMissionId(activeMission.id)
+      const completedSteps = progress.stepCompleted[mission.id] ?? [];
+      const nextStep = mission.steps.find((step) => !completedSteps.includes(step.id));
+
+      if (!nextStep) {
+        if (!progress.completedMissions.includes(mission.id)) {
+          const updatedExperience = progress.experience + 50;
+          state.updateGamifiedProgress({
+            completedMissions: [...progress.completedMissions, mission.id],
+            experience: updatedExperience,
+            level: Math.floor(updatedExperience / 100) + 1,
+            activeMissionId: findNextMissionId(mission.id)
+          });
+        }
+        return;
+      }
+
+      if (nextStep.successCheck(state)) {
+        state.updateGamifiedProgress({
+          stepCompleted: {
+            ...progress.stepCompleted,
+            [mission.id]: [...completedSteps, nextStep.id]
+          }
         });
       }
-      return;
-    }
+    };
 
-    const success = nextStep.successCheck(currentProjectState);
-    if (success) {
-      updateGamifiedProgress({
-        stepCompleted: {
-          ...gamifiedProgress.stepCompleted,
-          [activeMission.id]: [...completedSteps, nextStep.id]
-        }
-      });
-    }
-  }, [activeMission, gamifiedProgress, updateGamifiedProgress, diagnostics, simulation]);
+    const unsubscribe = useNodeLabStore.subscribe(evaluateMissionProgress);
+    evaluateMissionProgress();
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   return {
     showTips,
