@@ -3,29 +3,24 @@
 NodeLab is an Electron + React desktop sandbox that lets beginners build circuits by dragging LEGO-like components, wiring them
 together, and watching live feedback. It features beginner-first copy, live hints, and a simulation worker that keeps the UI responsive.
 
-## Download & install (no console required)
+## Download & install — no commands, ever
 
-1. Grab **`NodeLab-Setup.exe`** from the `release/` folder (or your build pipeline artifact).
-2. Double-click it. The installer is one-click and drops a desktop shortcut automatically.
-3. Prefer portable? Use **`NodeLab.exe`** in the same folder—no installation, just run it from anywhere.
-4. On first launch the app asks where to store projects (Desktop, Downloads, or custom).
+**If you just want to use NodeLab, stop reading after these four steps. There is no `npm`, no PowerShell, no command prompt involved.**
 
-## Developing locally
+1. Open the `release/` folder that ships with NodeLab (or grab the same files from the official download link).
+2. Double-click **`NodeLab-Setup.exe`**. The installer is truly one click and drops a desktop shortcut automatically.
+3. Prefer portable? Double-click **`NodeLab.exe`** instead. It runs from any folder without installing.
+4. Launch the app from the shortcut (or the portable `.exe`). On first launch NodeLab will ask where to store projects (Desktop, Downloads, or a custom folder).
 
-```bash
-npm install
-npm run dev
-```
+That’s it. You are done. No terminals, no `npm install`, no extra steps.
 
-This boots both the Electron shell and the Vite-powered renderer. The renderer is reachable at `http://localhost:5173` and auto-connects to the Electron window.
+---
 
-### Building installers
+## For contributors and power users
 
-```bash
-npm run package
-```
+Everything below is only for people who want to modify the codebase. If you just installed the app, you can safely ignore the rest of this document.
 
-This runs the TypeScript builds, bundles the renderer, mirrors it into `dist/renderer`, and calls `electron-builder` to create both the one-click installer (`release/NodeLab-Setup.exe`) and the portable executable (`release/NodeLab.exe`).
+Developer docs live in [`DEVELOPMENT.md`](DEVELOPMENT.md) and walk through the usual `npm` commands, hot reload, and packaging workflow.
 
 ## Key features
 
