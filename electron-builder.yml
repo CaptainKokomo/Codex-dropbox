@@ -1,0 +1,20 @@
+appId: com.nodelab.app
+productName: NodeLab
+directories:
+  output: release
+files:
+  - dist/main/**/*
+  - app/dist/**/*
+extraMetadata:
+  main: dist/main/main.js
+win:
+  target:
+    - nsis
+    - portable
+nsis:
+  oneClick: true
+  allowToChangeInstallationDirectory: false
+  artifactName: NodeLab-Setup.exe
+portable:
+  artifactName: NodeLab.exe
+publish: null

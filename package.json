@@ -1,0 +1,34 @@
+{
+  "name": "nodelab",
+  "version": "0.1.0",
+  "description": "NodeLab desktop sandbox for electronics learning",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "postinstall": "cd app && npm install",
+    "dev": "concurrently \"npm:dev:main\" \"npm:dev:renderer\"",
+    "dev:main": "ts-node --project tsconfig.json src/main/main.ts",
+    "dev:renderer": "cd app && npm run dev",
+    "build": "npm run build:main && cd app && npm run build && node scripts/copy-renderer.mjs",
+    "build:main": "tsc -p tsconfig.json",
+    "lint": "eslint 'src/**/*.ts'",
+    "package": "npm run build && electron-builder --win --x64",
+    "start": "electron dist/main/main.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^28.2.3",
+    "electron-store": "^8.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "concurrently": "^8.2.2",
+    "electron-builder": "^24.6.4",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-react": "^7.33.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
