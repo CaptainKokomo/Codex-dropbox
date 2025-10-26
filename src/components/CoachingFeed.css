@@ -1,0 +1,31 @@
+.coaching-feed {
+  position: absolute;
+  right: 24px;
+  bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 320px;
+  pointer-events: none;
+}
+
+.tip {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(30, 33, 49, 0.9);
+  color: #f1f5f9;
+  box-shadow: 0 14px 28px rgba(12, 16, 37, 0.45);
+  pointer-events: all;
+}
+
+.tip.info {
+  border-left: 3px solid #38d0ff;
+}
+
+.tip.warning {
+  border-left: 3px solid #f8c146;
+}
+
+.tip.error {
+  border-left: 3px solid #ff6b81;
+}

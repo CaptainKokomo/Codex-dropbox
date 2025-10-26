@@ -1,0 +1,26 @@
+appId: com.nodelab.app
+productName: NodeLab
+files:
+  - dist/web/**
+  - dist/electron/**
+  - package.json
+asar: true
+mac: null
+linux: null
+win:
+  artifactName: NodeLab-Setup.${ext}
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+portable:
+  artifactName: NodeLab.${ext}
+nsis:
+  oneClick: true
+  perMachine: false
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: true
+  shortcutName: NodeLab
