@@ -8,7 +8,7 @@ NodeLab is a drag-and-drop electronics sandbox that runs as an Electron + React 
 - **Portable:** Prefer to skip installing? Double-click `NodeLab.exe` from the portable zip.
 - **First launch:** The app immediately asks where to keep your projects (Desktop, Downloads, or any folder you choose).
 
-Both binaries live in the `dist/` folder generated for releases and can be shipped directly to users.
+Both binaries live in the `dist/` folder generated for releases (right next to `BuildNodeLabInstaller.bat`) and can be shipped directly to users.
 
 ## Features
 
@@ -43,6 +43,7 @@ If you need to produce fresh binaries, just double-click `BuildNodeLabInstaller.
 - Downloads a portable Node.js runtime into `tools/` if it is not already present.
 - Installs the exact dependencies declared in `package.json` with zero prompts.
 - Runs `electron-builder` to emit `NodeLab-Setup.exe` and `NodeLab.exe` into the `dist/` folder.
+- Saves a detailed transcript at `logs/BuildNodeLabInstaller.log` and keeps the window open so you can review the status.
 
 No terminals, `npm install` commands, or prior Node.js installation are required.
 
@@ -55,7 +56,7 @@ npm run dev
 
 ## Packaging
 
-When you are ready to ship a build, double-click `BuildNodeLabInstaller.bat`. The script handles compilation and packaging in one shot and outputs both binaries to the `dist/` directory. Installer settings prompt users for their save folder on first launch and create a desktop shortcut.
+When you are ready to ship a build, double-click `BuildNodeLabInstaller.bat`. The script handles compilation and packaging in one shot, outputs both binaries to the `dist/` directory beside the script, and records the run to `logs/BuildNodeLabInstaller.log` for troubleshooting. Installer settings prompt users for their save folder on first launch and create a desktop shortcut.
 
 ## Testing & QA
 
