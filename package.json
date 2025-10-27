@@ -1,0 +1,51 @@
+{
+  "name": "nodelab",
+  "version": "0.1.0",
+  "description": "NodeLab — drag-and-drop electronics sandbox for Windows",
+  "author": "NodeLab Team",
+  "private": true,
+  "main": "dist/electron/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development concurrently \"vite --mode development\" \"npm:dev:electron\"",
+    "dev:electron": "cross-env NODE_ENV=development ts-node --esm --project tsconfig.node.json electron/main.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "build": "vite build && npm run build:electron",
+    "build:electron": "tsc --project tsconfig.node.json && electron-builder --dir",
+    "package:win": "tsc --project tsconfig.node.json && vite build && electron-builder --win",
+    "package:portable": "tsc --project tsconfig.node.json && vite build && electron-builder --win portable"
+  },
+  "dependencies": {
+    "@floating-ui/react": "^0.26.13",
+    "classnames": "^2.5.1",
+    "electron-store": "^11.0.2",
+    "electron-updater": "^6.1.8",
+    "immer": "^10.0.2",
+    "nanoid": "^4.0.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "@types/react": "^18.2.42",
+    "@types/react-dom": "^18.2.18",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^28.2.0",
+    "electron-builder": "^26.0.12",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.33.2",
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.0",
+    "vite-plugin-electron": "^0.15.5"
+  }
+}
