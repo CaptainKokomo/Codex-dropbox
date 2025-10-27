@@ -1,0 +1,76 @@
+{
+  "name": "nodelab",
+  "version": "0.1.0",
+  "description": "NodeLab: drag-and-drop electronics sandbox",
+  "main": "dist/main/main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development electron .",
+    "start": "electron .",
+    "build": "tsc -p tsconfig.json && vite build && electron-builder",
+    "lint": "eslint 'src/**/*.{ts,tsx}'"
+  },
+  "build": {
+    "appId": "com.nodelab.app",
+    "productName": "NodeLab",
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "build"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "NodeLab-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0",
+    "electron-updater": "^6.1.4",
+    "pixi.js": "^7.3.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "zustand": "^4.4.1",
+    "immer": "^10.0.3",
+    "clsx": "^2.0.0",
+    "nanoid": "^4.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.2",
+    "@types/react": "^18.2.20",
+    "@types/react-dom": "^18.2.7",
+    "@typescript-eslint/eslint-plugin": "^6.3.0",
+    "@typescript-eslint/parser": "^6.3.0",
+    "cross-env": "^7.0.3",
+    "electron": "^25.3.0",
+    "electron-builder": "^24.6.0",
+    "eslint": "^8.47.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.33.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.9",
+    "@vitejs/plugin-react": "^4.0.0"
+  }
+}
