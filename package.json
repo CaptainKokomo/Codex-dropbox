@@ -6,7 +6,10 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development electron .",
+   "scripts": {
+     "dev": "tsc -p tsconfig.json && cross-env NODE_ENV=development electron .",
+     "start": "electron .",
+     "build": "tsc -p tsconfig.json && vite build && electron-builder",
     "start": "electron .",
     "build": "tsc -p tsconfig.json && vite build && electron-builder",
     "lint": "eslint 'src/**/*.{ts,tsx}'"
