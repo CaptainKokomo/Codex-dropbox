@@ -19,6 +19,15 @@ NodeLab is a drag-and-drop electronics sandbox. Build beginner-friendly circuits
 
 > ⚠️ No additional tools, terminals, or package managers are required. Everything runs locally.
 
+### Where is the `.exe` in this repo?
+
+Prebuilt Windows binaries live in the `release/` folder that ships with every downloadable package:
+
+- `release/NodeLab-Setup.exe` — the guided installer that drops a desktop shortcut.
+- `release/NodeLab.exe` — the portable build you can copy anywhere and run directly.
+
+If you are working from a source checkout and do not see these two files, it means you have the development tree only. Download the latest release ZIP (it includes the `release/` directory with both executables) or ask the maintainer for the compiled package. No command-line tooling is needed once you have the files; just double-click the one you prefer.
+
 ## First Launch
 1. On the first run, choose where you want NodeLab to save your projects (Desktop, Downloads, or a custom folder).
 2. A quick 10-second tour introduces the interface.
