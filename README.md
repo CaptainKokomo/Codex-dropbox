@@ -56,7 +56,7 @@ npm run dev
 
 ## Packaging
 
-When you are ready to ship a build, double-click `BuildNodeLabInstaller.bat`. The script handles compilation and packaging in one shot, outputs both binaries to the `dist/` directory beside the script, and records the run to `logs/BuildNodeLabInstaller.log` for troubleshooting. Installer settings prompt users for their save folder on first launch and create a desktop shortcut.
+When you are ready to ship a build, double-click `BuildNodeLabInstaller.bat`. The script first runs the full `npm run build` pipeline (render process + Electron main/preload bundles) and then packages everything with `electron-builder`. Both binaries land in the `dist/` directory beside the script, and the run is recorded to `logs/BuildNodeLabInstaller.log` for troubleshooting. Installer settings prompt users for their save folder on first launch and create a desktop shortcut.
 
 ## Testing & QA
 

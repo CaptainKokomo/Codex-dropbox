@@ -2,7 +2,7 @@ import { app, BrowserWindow, dialog, ipcMain, nativeTheme } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import Store from 'electron-store';
 import path from 'node:path';
-import url from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -16,6 +16,9 @@ const store = new Store<{ firstRunComplete: boolean; projectFolder?: string; aut
 });
 
 let mainWindow: BrowserWindow | null = null;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const getPreloadPath = () => {
   return path.join(__dirname, 'preload.js');
@@ -45,13 +48,8 @@ async function createWindow() {
     await mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
-    await mainWindow.loadURL(
-      url.format({
-        pathname: path.join(__dirname, '../web/index.html'),
-        protocol: 'file:',
-        slashes: true
-      })
-    );
+    const fileUrl = pathToFileURL(path.join(__dirname, '../web/index.html'));
+    await mainWindow.loadURL(fileUrl.toString());
   }
 
   mainWindow.on('closed', () => {

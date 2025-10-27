@@ -12,9 +12,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "build": "vite build && npm run build:electron",
-    "build:electron": "tsc --project tsconfig.node.json && electron-builder --dir",
-    "package:win": "tsc --project tsconfig.node.json && vite build && electron-builder --win",
-    "package:portable": "tsc --project tsconfig.node.json && vite build && electron-builder --win portable"
+    "build:electron": "tsc --project tsconfig.node.json",
+    "package:win": "npm run build && electron-builder --win",
+    "package:portable": "npm run build && electron-builder --win portable"
   },
   "dependencies": {
     "@floating-ui/react": "^0.26.13",
