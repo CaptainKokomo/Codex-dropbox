@@ -28,10 +28,8 @@ set NODE_EXE=%NODE_DIR%\node.exe
 set NPM_CLI=%NODE_DIR%\node_modules\npm\bin\npm-cli.js
 set NPX_CLI=%NODE_DIR%\node_modules\npm\bin\npx-cli.js
 
-if not exist "%SCRIPT_DIR%node_modules" (
-  echo Installing build dependencies...
-  "%NODE_EXE%" "%NPM_CLI%" install --no-audit --no-fund >>"%LOG_FILE%" 2>&1 || goto :fail
-)
+echo Installing build dependencies (this may take a moment)...
+"%NODE_EXE%" "%NPM_CLI%" install --no-audit --no-fund >>"%LOG_FILE%" 2>&1 || goto :fail
 
 echo Building NodeLab installer and portable package...
 "%NODE_EXE%" "%NPX_CLI%" --yes electron-builder --config electron-builder.yml >>"%LOG_FILE%" 2>&1 || goto :fail

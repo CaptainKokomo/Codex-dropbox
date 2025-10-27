@@ -41,7 +41,7 @@ Both binaries live in the `dist/` folder generated for releases (right next to `
 If you need to produce fresh binaries, just double-click `BuildNodeLabInstaller.bat` from Windows Explorer. The script:
 
 - Downloads a portable Node.js runtime into `tools/` if it is not already present.
-- Installs the exact dependencies declared in `package.json` with zero prompts.
+- Installs the exact dependencies declared in `package.json` with zero prompts (it refreshes them on every run to stay in sync).
 - Runs `electron-builder` to emit `NodeLab-Setup.exe` and `NodeLab.exe` into the `dist/` folder.
 - Saves a detailed transcript at `logs/BuildNodeLabInstaller.log` and keeps the window open so you can review the status.
 
