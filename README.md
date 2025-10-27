@@ -42,8 +42,8 @@ If you need to produce fresh binaries, just double-click `BuildNodeLabInstaller.
 
 - Downloads a portable Node.js runtime into `tools/` if it is not already present.
 - Installs the exact dependencies declared in `package.json` with zero prompts (it refreshes them on every run to stay in sync).
-- Runs `electron-builder` to emit `NodeLab-Setup.exe` and `NodeLab.exe` into the `dist/` folder.
-- Saves a detailed transcript at `logs/BuildNodeLabInstaller.log` and keeps the window open so you can review the status.
+- Runs `electron-builder` while directing its intermediate output to `%LOCALAPPDATA%\NodeLabBuild` so Windows security policies never block the write, then copies the finished binaries into the repo's `dist/` folder.
+- Saves a detailed transcript at `logs/BuildNodeLabInstaller.log` and keeps the window open so you can review the status. The temporary build directory is removed automatically once the copies succeed.
 
 No terminals, `npm install` commands, or prior Node.js installation are required.
 
@@ -56,7 +56,7 @@ npm run dev
 
 ## Packaging
 
-When you are ready to ship a build, double-click `BuildNodeLabInstaller.bat`. The script first runs the full `npm run build` pipeline (render process + Electron main/preload bundles) and then packages everything with `electron-builder`. Both binaries land in the `dist/` directory beside the script, and the run is recorded to `logs/BuildNodeLabInstaller.log` for troubleshooting. Installer settings prompt users for their save folder on first launch and create a desktop shortcut.
+When you are ready to ship a build, double-click `BuildNodeLabInstaller.bat`. The script first runs the full `npm run build` pipeline (render process + Electron main/preload bundles) and then packages everything with `electron-builder`, instructing it to stage outputs under `%LOCALAPPDATA%\NodeLabBuild` before mirroring the final `.exe` files back into `dist/`. This avoids Windows Defender/Controlled Folder Access restrictions that can block executables from being created directly inside Downloads or synced folders. Both binaries land beside the script after the copy step, and the run is recorded to `logs/BuildNodeLabInstaller.log` for troubleshooting. Installer settings prompt users for their save folder on first launch and create a desktop shortcut.
 
 ## Testing & QA
 
