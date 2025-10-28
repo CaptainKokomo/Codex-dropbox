@@ -1,0 +1,21 @@
+{
+  "productName": "NodeLab",
+  "appId": "com.nodelab.app",
+  "directories": {
+    "output": "release",
+    "buildResources": "build"
+  },
+  "files": [
+    "dist/**/*",
+    "package.json"
+  ],
+  "win": {
+    "target": ["nsis", "portable"],
+    "artifactName": "${productName}-${version}-${arch}.${ext}"
+  },
+  "nsis": {
+    "oneClick": true,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": false
+  }
+}
