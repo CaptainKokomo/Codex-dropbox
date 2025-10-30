@@ -74,7 +74,7 @@ const WorkbenchPlaceholder: React.FC = () => {
       >
         <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#f2f7ff' }}>Next time you launch:</strong>
         <ol style={{ margin: 0, paddingLeft: '1.2rem' }}>
-          <li style={{ marginBottom: '0.4rem' }}>Double-click the NodeLab shortcut or the portable NodeLab.exe where you stored it.</li>
+          <li style={{ marginBottom: '0.4rem' }}>Double-click the NodeLab shortcut or the portable NodeLab.exe you kept from the release bundle.</li>
           <li style={{ marginBottom: '0.4rem' }}>The workbench opens immediately—no wizard unless you reset it here.</li>
           <li style={{ marginBottom: 0 }}>Need to change folders or updates later? Open Settings on the bench shell.</li>
         </ol>
@@ -93,7 +93,11 @@ const WorkbenchPlaceholder: React.FC = () => {
       >
         Reset first-run wizard
       </button>
-      <small style={{ color: 'rgba(235, 244, 255, 0.55)' }}>Save folder: {preferences?.saveFolder ?? 'Not set'}</small>
+      <small style={{ color: 'rgba(235, 244, 255, 0.55)', maxWidth: 420, textAlign: 'center', lineHeight: 1.4 }}>
+        Save folder: {preferences?.saveFolder ?? 'Not set'}
+        <br />
+        Portable build for source maintainers: <code>release/win-unpacked/NodeLab.exe</code>
+      </small>
     </div>
   );
 };

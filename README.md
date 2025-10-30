@@ -16,6 +16,16 @@ Stage 0 focuses entirely on the first-run experience. When learners open NodeLab
 
 > ⚠️ This repository snapshot contains **source code only**. It does not embed the compiled `.exe` files. If you do not yet have the packaged release bundle, there is nothing to install—request the Stage 0 Windows bundle from the release channel before proceeding.
 
+### Where is the executable when I build from source?
+
+When the packaging pipeline is executed for this repository, Electron Builder creates the portable binary at:
+
+```
+release/win-unpacked/NodeLab.exe
+```
+
+That `NodeLab.exe` can be zipped and shared as the portable build. Creating the `NodeLab-Setup.exe` installer still requires running the packaging pipeline on Windows (or Linux with Wine) because signing/editing the executable metadata is a Windows-only step. The build script now prints a warning when the installer is missing so you know the job is incomplete. See [`docs/release-artifacts.md`](docs/release-artifacts.md) for a snapshot of the generated files.
+
 ## Using the Wizard
 A step-by-step walkthrough of the entire first-run flow is available in [`docs/stage0-first-run-guide.md`](docs/stage0-first-run-guide.md). Share it with new learners so they know exactly what to expect before touching the workbench.
 

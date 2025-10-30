@@ -12,6 +12,8 @@ This guide explains exactly what you will see after installing the Stage 0 build
 
 > **Important:** This repository contains the source only. Until you receive the release ZIP, there is no executable to run.
 
+If you are looking at the source tree after a maintainer has produced a build, the portable binary lives at `release/win-unpacked/NodeLab.exe`. The installer (`NodeLab-Setup.exe`) is generated only when the packaging pipeline runs on Windows (or Linux with Wine), so source-only drops may list the portable executable but still omit the installer.
+
 ## 2. Welcome Screen
 
 - On first launch, NodeLab opens to a warm welcome panel that sets expectations for the onboarding journey.

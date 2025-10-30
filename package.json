@@ -18,7 +18,7 @@
     "dev:renderer": "node scripts/copy-static.mjs && esbuild src/index.tsx --bundle --target=es2020 --format=esm --outdir=dist/renderer --log-level=info --define:process.env.NODE_ENV='\"development\"' --jsx=automatic --watch --servedir=dist",
     "dev:electron": "wait-on dist/renderer/index.js && cross-env NODE_ENV=development electron .",
     "lint": "echo 'No linters configured for Stage 0'",
-    "package": "npm run build && electron-builder --config electron-builder.json"
+    "package": "npm run build && electron-builder --config electron-builder.json --win dir && node scripts/post-package-report.mjs"
   },
   "devDependencies": {
     "@electron-toolkit/preload": "^3.0.2",

@@ -10,8 +10,9 @@
     "package.json"
   ],
   "win": {
-    "target": ["nsis", "portable"],
-    "artifactName": "${productName}-${version}-${arch}.${ext}"
+    "target": ["dir", "nsis"],
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "signAndEditExecutable": false
   },
   "nsis": {
     "oneClick": true,
