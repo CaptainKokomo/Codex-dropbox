@@ -60,6 +60,25 @@ const WorkbenchPlaceholder: React.FC = () => {
         The interactive breadboard bench arrives in the next stage. For now, your preferences are saved and the tour prepares you
         for hands-on building.
       </p>
+      <div
+        style={{
+          background: 'rgba(17, 25, 40, 0.55)',
+          borderRadius: '18px',
+          padding: '1.25rem 1.5rem',
+          maxWidth: 440,
+          boxShadow: '0 12px 28px rgba(9, 16, 32, 0.45)',
+          textAlign: 'left',
+          fontSize: '0.95rem',
+          lineHeight: 1.6,
+        }}
+      >
+        <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#f2f7ff' }}>Next time you launch:</strong>
+        <ol style={{ margin: 0, paddingLeft: '1.2rem' }}>
+          <li style={{ marginBottom: '0.4rem' }}>Double-click the NodeLab shortcut or the portable NodeLab.exe where you stored it.</li>
+          <li style={{ marginBottom: '0.4rem' }}>The workbench opens immediately—no wizard unless you reset it here.</li>
+          <li style={{ marginBottom: 0 }}>Need to change folders or updates later? Open Settings on the bench shell.</li>
+        </ol>
+      </div>
       <button
         onClick={() => resetOnboarding()}
         style={{

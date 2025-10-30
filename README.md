@@ -10,11 +10,11 @@ Stage 0 focuses entirely on the first-run experience. When learners open NodeLab
 - **Local telemetry sandbox** that logs progress for future replay while remaining on-device.
 
 ## Running the Stage 0 Build
-1. Download the packaged Windows bundle (`NodeLab-Stage0-Windows.zip`) supplied with the release of this build.
-2. Double-click either `NodeLab-Setup.exe` (installer) or `NodeLab.exe` (portable). Both are inside the ZIP—no terminals required.
-3. Follow the in-app wizard described above. Once complete, the bench shell placeholder appears automatically on future launches.
+1. Download the packaged Windows bundle (`NodeLab-Stage0-Windows.zip`) that accompanies the official release of this source drop.
+2. Open the ZIP and double-click either `NodeLab-Setup.exe` (installs with a desktop shortcut) or `NodeLab.exe` (portable, runs in-place). No command prompts or package managers are involved.
+3. The executable launches directly into the wizard described above. After you finish, subsequent launches jump straight to the bench placeholder.
 
-> ⚠️ The source repository does **not** contain compiled executables. Always use the packaged release bundle that accompanies official drops when you want to run NodeLab without developer tooling.
+> ⚠️ This repository snapshot contains **source code only**. It does not embed the compiled `.exe` files. If you do not yet have the packaged release bundle, there is nothing to install—request the Stage 0 Windows bundle from the release channel before proceeding.
 
 ## Using the Wizard
 A step-by-step walkthrough of the entire first-run flow is available in [`docs/stage0-first-run-guide.md`](docs/stage0-first-run-guide.md). Share it with new learners so they know exactly what to expect before touching the workbench.

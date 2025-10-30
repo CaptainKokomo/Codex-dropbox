@@ -4,18 +4,18 @@ This guide explains exactly what you will see after installing the Stage 0 build
 
 ## 1. Launching NodeLab
 
-1. Download the packaged Windows build of NodeLab Stage 0 (``NodeLab-Stage0-Windows.zip``) from the official release page provided with your installer delivery.
+1. Download the packaged Windows build of NodeLab Stage 0 (`NodeLab-Stage0-Windows.zip`) from the release channel that accompanies this source drop.
 2. Inside the ZIP you will find two ready-to-run options:
-   - ``NodeLab-Setup.exe`` – runs an installer that places NodeLab in ``C:\Program Files\NodeLab`` and adds a desktop shortcut.
-   - ``NodeLab.exe`` – a portable edition you can keep on any drive without installing.
-3. Double-click either executable. If you choose the installer, follow the built-in wizard; it finishes with a ``Launch NodeLab`` button.
+   - `NodeLab-Setup.exe` – runs an installer that places NodeLab in `C:\Program Files\NodeLab` and adds a desktop shortcut.
+   - `NodeLab.exe` – a portable edition you can keep on any drive without installing.
+3. Double-click either executable. The installer finishes with a **Launch NodeLab** button; the portable build opens immediately.
 
-> **Important:** The source code repository does not include the compiled executables. Always use the packaged release bundle distributed alongside this build when you want to run NodeLab without development tools.
+> **Important:** This repository contains the source only. Until you receive the release ZIP, there is no executable to run.
 
 ## 2. Welcome Screen
 
 - On first launch, NodeLab opens to a warm welcome panel that sets expectations for the onboarding journey.
-- Click **Get Started** to continue. This button is the only way forward; there is no command line fallback.
+- Click **Let’s get started** to continue. This button is the only way forward; there is no command line fallback.
 
 ## 3. Choose Your Save Folder
 
@@ -26,7 +26,7 @@ This guide explains exactly what you will see after installing the Stage 0 build
 ## 4. Auto-Update Preference
 
 - The next panel lets you decide whether NodeLab should auto-update itself when future offline patches are available.
-- Toggle **Auto-update** on or off. Your choice is saved immediately and becomes the default behavior for this machine.
+- Use the **Turn off auto-update** / **Keep auto-update on** button to flip the setting. Your choice is saved immediately and becomes the default behavior for this machine.
 
 ## 5. Quick Orientation Tour
 
@@ -35,7 +35,7 @@ This guide explains exactly what you will see after installing the Stage 0 build
   2. **Left Tray:** previews the components palette that will arrive in Stage 1.
   3. **Right Inspector:** points to the area reserved for component details.
   4. **Bottom Instruments:** introduces where the multimeter and oscilloscope will live.
-- Each highlight advances automatically. You can also click **Next** to speed it up or **Skip Tour** if you have seen it before.
+- Each highlight advances automatically every few seconds until the tour completes. Let it finish or close the app once you have seen enough.
 
 ## 6. Reaching the Bench Shell
 
