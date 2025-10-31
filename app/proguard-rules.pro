@@ -1,0 +1,1 @@
+# SerenityWave keeps default rules.
