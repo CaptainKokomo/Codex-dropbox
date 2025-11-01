@@ -33,6 +33,13 @@ class LocalSessionRepository(
             .map { prefs -> SessionStorageCodec.decodeOrEmpty(prefs[sessionsKey]) }
             .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
+    /**
+     * Upserts the given session into the locally persisted session list.
+     *
+     * If a session with the same `id` already exists it is replaced; otherwise the session is appended.
+     *
+     * @param session The session to save or replace in storage.
+     */
     override suspend fun saveSession(session: SessionBlueprint) {
         context.dataStore.edit { prefs ->
             val current = SessionStorageCodec.decodeOrEmpty(prefs[sessionsKey]).toMutableList()
@@ -46,6 +53,13 @@ class LocalSessionRepository(
         }
     }
 
+    /**
+     * Remove the session with the given id from the persisted session list.
+     *
+     * If no session matches the provided id, the stored list remains unchanged.
+     *
+     * @param id The identifier of the session to remove.
+     */
     override suspend fun deleteSession(id: String) {
         context.dataStore.edit { prefs ->
             val filtered = SessionStorageCodec

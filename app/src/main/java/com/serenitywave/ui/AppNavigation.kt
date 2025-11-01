@@ -30,6 +30,14 @@ sealed class NavDestination(val route: String, val label: String, val icon: @Com
     object Library : NavDestination("library", "Library", { Icon(Icons.Outlined.LibraryMusic, contentDescription = null) })
 }
 
+/**
+ * Hosts the app's navigation UI including a bottom navigation bar and corresponding navigation graph.
+ *
+ * Displays a NavigationBar with four destinations (Presets, Custom, Sessions, Library), manages a
+ * NavController, preserves and restores navigation state when switching destinations, and provides a
+ * NavHost whose start destination is Presets and whose routes map to the corresponding screens:
+ * PresetsScreen, CustomToneScreen, SessionBuilderScreen, and LibraryScreen.
+ */
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()

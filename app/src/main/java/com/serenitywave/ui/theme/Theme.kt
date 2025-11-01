@@ -24,6 +24,12 @@ private val DarkColors = darkColorScheme(
     onSurface = Mist
 )
 
+/**
+ * Applies the SerenityWave Material 3 theme to [content] using the library's predefined light and dark color schemes.
+ *
+ * @param darkTheme When `true`, the theme uses the dark color scheme; when `false`, the light color scheme is used. Defaults to the system dark mode setting.
+ * @param content Composable content to be styled with the SerenityWave theme.
+ */
 @Composable
 fun SerenityWaveTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
