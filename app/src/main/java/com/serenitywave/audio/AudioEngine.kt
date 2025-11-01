@@ -11,9 +11,9 @@ class AudioEngine {
     private val _currentPhaseRemainingSeconds = MutableStateFlow(0)
     val currentPhaseRemainingSeconds: StateFlow<Int> = _currentPhaseRemainingSeconds.asStateFlow()
 
-    fun play(sessionId: String) {
+    fun play(sessionDurationSeconds: Int) {
         _isPlaying.value = true
-        _currentPhaseRemainingSeconds.value = 0
+        _currentPhaseRemainingSeconds.value = sessionDurationSeconds
     }
 
     fun stop() {
