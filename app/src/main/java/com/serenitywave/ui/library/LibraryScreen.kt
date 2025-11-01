@@ -22,6 +22,13 @@ import com.serenitywave.ui.LocalEnvironment
 import kotlinx.coroutines.launch
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
+/**
+ * Displays saved sessions from the current environment and provides Play and Delete controls for each.
+ *
+ * The composable observes the environment's session repository and shows a header plus either a
+ * placeholder when no sessions exist or a scrollable list of SessionCard items. Tapping Delete
+ * removes the session from the repository.
+ */
 @Composable
 fun LibraryScreen() {
     val environment = LocalEnvironment.current
@@ -53,6 +60,16 @@ fun LibraryScreen() {
     }
 }
 
+/**
+ * Renders a card summarizing a saved session and exposes Play and Delete actions.
+ *
+ * Displays the session name, comma-separated tags, number of phases, and total duration in minutes,
+ * and provides buttons to trigger playback or deletion.
+ *
+ * @param session The session blueprint whose metadata is shown.
+ * @param onPlay Callback invoked when the "Play" button is pressed.
+ * @param onDelete Callback invoked when the "Delete" button is pressed.
+ */
 @Composable
 private fun SessionCard(
     session: SessionBlueprint,

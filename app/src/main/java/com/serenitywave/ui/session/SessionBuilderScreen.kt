@@ -31,6 +31,13 @@ import com.serenitywave.domain.SessionPhase
 import com.serenitywave.domain.ToneLayer
 import com.serenitywave.ui.LocalEnvironment
 
+/**
+ * Presents the session builder UI and wires it to a SessionBuilderViewModel from the current environment.
+ *
+ * Displays editable fields for session name and tags, a list of editable session phases (with tone and ambient layer editors),
+ * and controls to add, duplicate, delete, and reorder session content; it also shows total duration, save status, errors, and a Save action
+ * that dispatches changes to the ViewModel.
+ */
 @Composable
 fun SessionBuilderScreen() {
     val environment = LocalEnvironment.current
@@ -115,6 +122,24 @@ fun SessionBuilderScreen() {
     }
 }
 
+/**
+ * Renders an editable card for a single session phase, including its metadata, tone layers, and ambient layers.
+ *
+ * Displays fields for editing phase name, duration, fade timings, a list of ToneLayer editors (with add/remove),
+ * a list of AmbientLayer editors (with add/remove), and actions to duplicate or delete the phase.
+ *
+ * @param phase The SessionPhase model to display and edit.
+ * @param canDelete Whether the Delete action should be enabled.
+ * @param onPhaseChange Invoked with an updated SessionPhase when any top-level phase property changes.
+ * @param onToneLayerChange Invoked with the index and updated ToneLayer when a tone layer changes.
+ * @param onAddToneLayer Invoked to add a new tone layer to this phase.
+ * @param onRemoveToneLayer Invoked with the index of the tone layer to remove.
+ * @param onAmbientLayerChange Invoked with the index and updated AmbientLayer when an ambient layer changes.
+ * @param onAddAmbientLayer Invoked to add a new ambient layer to this phase.
+ * @param onRemoveAmbientLayer Invoked with the index of the ambient layer to remove.
+ * @param onDuplicate Invoked to duplicate this phase.
+ * @param onDelete Invoked to delete this phase.
+ */
 @Composable
 private fun PhaseCard(
     phase: SessionPhase,
@@ -187,6 +212,18 @@ private fun PhaseCard(
     }
 }
 
+/**
+ * Renders an editor for a single tone layer with editable fields for band ID, beat frequency,
+ * carrier frequency, volume, and modulation type.
+ *
+ * The editor reflects the provided `tone` values and invokes callbacks when the user changes
+ * any field or requests removal.
+ *
+ * @param tone The current tone layer state to display and edit.
+ * @param canRemove If true, shows a control that allows the user to remove this tone layer.
+ * @param onToneChange Invoked with an updated `ToneLayer` when the user modifies any field.
+ * @param onRemove Invoked when the user requests removal of this tone layer.
+ */
 @Composable
 private fun ToneLayerEditor(
     tone: ToneLayer,
@@ -235,6 +272,15 @@ private fun ToneLayerEditor(
     }
 }
 
+/**
+ * Editor UI for a single ambient layer.
+ *
+ * Displays editable fields for the ambient's name and volume and a button to remove the layer.
+ *
+ * @param ambient The AmbientLayer instance being edited.
+ * @param onAmbientChange Invoked with an updated AmbientLayer when the user changes name or volume.
+ * @param onRemove Invoked when the user requests removal of this ambient layer.
+ */
 @Composable
 private fun AmbientLayerEditor(
     ambient: AmbientLayer,

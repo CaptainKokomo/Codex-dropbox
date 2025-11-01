@@ -23,6 +23,13 @@ import androidx.compose.ui.unit.dp
 import com.serenitywave.domain.BrainwaveBand
 import com.serenitywave.domain.defaultBands
 
+/**
+ * Composable screen that displays a scrollable list of brainwave preset cards and allows the user to select one.
+ *
+ * Each preset card shows the band's name, frequency range, and description; tapping the card or the "Preview"
+ * button marks that band as selected. When a band is selected, a summary line with the selected band's name
+ * and frequency range is shown at the bottom of the list.
+ */
 @Composable
 fun PresetsScreen() {
     var selectedBand by remember { mutableStateOf<BrainwaveBand?>(null) }

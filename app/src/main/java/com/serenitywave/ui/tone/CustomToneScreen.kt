@@ -24,6 +24,13 @@ import androidx.compose.ui.unit.dp
 import com.serenitywave.domain.ModulationType
 import com.serenitywave.domain.defaultBands
 
+/**
+ * Displays a screen for creating and previewing a custom tone with selectable band, frequencies, volume, and modulation.
+ *
+ * Provides UI controls to select a frequency band, adjust beat frequency and carrier frequency via sliders, set playback volume,
+ * choose a modulation type, and trigger a preview of the configured tone. Internal state for the selected band, frequencies,
+ * volume, and modulation is managed within the composable.
+ */
 @Composable
 fun CustomToneScreen() {
     var selectedBandIndex by remember { mutableStateOf(0) }
@@ -94,6 +101,12 @@ fun CustomToneScreen() {
     }
 }
 
+/**
+ * Renders a horizontal group of buttons for each available band and notifies when a band is chosen.
+ *
+ * @param selected The index of the currently selected band (provided for caller state; this composable does not apply selection styling).
+ * @param onSelected Callback invoked with the index of the band when its button is clicked.
+ */
 @Composable
 private fun BandChips(selected: Int, onSelected: (Int) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
