@@ -21,8 +21,10 @@ const elements = {
   tagList: document.getElementById('tagList'),
   quickCaptureBtn: document.getElementById('quickCaptureBtn'),
   quickCaptureDialog: document.getElementById('quickCaptureDialog'),
+  quickCaptureForm: document.getElementById('quickCaptureForm'),
   quickCaptureTitle: document.getElementById('quickCaptureTitle'),
   quickCaptureContent: document.getElementById('quickCaptureContent'),
+  quickCaptureCancel: document.getElementById('quickCaptureCancel'),
   searchDialog: document.getElementById('searchDialog'),
   searchInput: document.getElementById('searchInput'),
   searchForm: document.getElementById('searchForm'),
@@ -50,6 +52,20 @@ const elements = {
   newSpace: document.getElementById('newSpace'),
   toggleSidebar: document.getElementById('toggleSidebar'),
   contextMenu: document.getElementById('contextMenu'),
+  entityDialog: document.getElementById('entityDialog'),
+  entityDialogTitle: document.getElementById('entityDialogTitle'),
+  entityDialogLabel: document.getElementById('entityDialogLabel'),
+  entityDialogInput: document.getElementById('entityDialogInput'),
+  entityDialogSubmit: document.getElementById('entityDialogSubmit'),
+  confirmDialog: document.getElementById('confirmDialog'),
+  confirmDialogTitle: document.getElementById('confirmDialogTitle'),
+  confirmDialogMessage: document.getElementById('confirmDialogMessage'),
+  confirmDialogConfirm: document.getElementById('confirmDialogConfirm'),
+  selectDialog: document.getElementById('selectDialog'),
+  selectDialogTitle: document.getElementById('selectDialogTitle'),
+  selectDialogLabel: document.getElementById('selectDialogLabel'),
+  selectDialogInput: document.getElementById('selectDialogInput'),
+  selectDialogSubmit: document.getElementById('selectDialogSubmit'),
 };
 
 async function init() {
@@ -75,7 +91,9 @@ function bindEvents() {
   });
 
   elements.quickCaptureBtn.addEventListener('click', openQuickCapture);
-  elements.quickCaptureDialog.addEventListener('close', handleQuickCaptureClose);
+  elements.quickCaptureForm.addEventListener('submit', handleQuickCaptureSubmit);
+  elements.quickCaptureCancel.addEventListener('click', () => elements.quickCaptureDialog.close());
+  elements.quickCaptureDialog.addEventListener('cancel', () => elements.quickCaptureDialog.close());
 
   elements.searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -539,19 +557,23 @@ function openQuickCapture() {
   elements.quickCaptureTitle.focus();
 }
 
-async function handleQuickCaptureClose(event) {
-  if (elements.quickCaptureDialog.returnValue === 'submit') {
-    const title = elements.quickCaptureTitle.value.trim();
-    const content = elements.quickCaptureContent.value.trim();
-    if (!content) {
-      showToast('Capture needs content');
-      return;
-    }
+async function handleQuickCaptureSubmit(event) {
+  event.preventDefault();
+  const title = elements.quickCaptureTitle.value.trim();
+  const content = elements.quickCaptureContent.value.trim();
+  if (!content) {
+    showToast('Capture needs content');
+    return;
+  }
+  try {
     const location = await window.brain.quickCapture({ title, content });
     showToast('Captured to Inbox');
     elements.quickCaptureDialog.close();
     refreshTree(false);
     selectNote(location.space, location.section, location.note);
+  } catch (error) {
+    console.error(error);
+    showToast('Quick capture failed');
   }
 }
 
@@ -627,7 +649,12 @@ function handleGlobalClick(event) {
 }
 
 async function promptCreate(type, payload = {}) {
-  const name = prompt(`Name for the new ${type}`);
+  const label = type === 'space' ? 'Space' : type === 'section' ? 'Section' : 'Note';
+  const name = await requestTextDialog({
+    title: `Create ${label}`,
+    label: `${label} name`,
+    submitText: 'Create',
+  });
   if (!name) return;
   await window.brain.create({ type, ...payload, name });
   showToast(`${type} created`);
@@ -637,7 +664,13 @@ async function promptCreate(type, payload = {}) {
 async function promptRename(type, payload) {
   const current =
     type === 'space' ? payload.space : type === 'section' ? payload.section : payload.note;
-  const name = prompt(`Rename ${type}`, current);
+  const label = type === 'space' ? 'Space' : type === 'section' ? 'Section' : 'Note';
+  const name = await requestTextDialog({
+    title: `Rename ${label}`,
+    label: `${label} name`,
+    defaultValue: current,
+    submitText: 'Rename',
+  });
   if (!name || name === current) return;
   await window.brain.rename({
     type,
@@ -654,7 +687,12 @@ async function promptRename(type, payload) {
 }
 
 async function deleteNote(payload) {
-  if (!confirm('Delete this note? This can be undone via versions.')) return;
+  const ok = await requestConfirmDialog({
+    title: 'Delete note',
+    message: `Delete "${payload.note}"? You can undo via versions.`,
+    confirmText: 'Delete',
+  });
+  if (!ok) return;
   await window.brain.deleteNote(payload);
   if (
     state.selected &&
@@ -677,7 +715,12 @@ async function toggleStructured(payload) {
     showToast('Structured list disabled');
     return;
   }
-  const fields = prompt('Enter comma-separated field names', metadata.fields?.join(', ') || 'Status, Type, Priority');
+  const fields = await requestTextDialog({
+    title: 'Structured fields',
+    label: 'Comma separated fields',
+    defaultValue: metadata.fields?.join(', ') || 'Status, Type, Priority',
+    submitText: 'Save fields',
+  });
   if (!fields) return;
   const list = fields
     .split(',')
@@ -746,22 +789,36 @@ function switchAiTab(tab) {
   elements.aiToolsPanel.hidden = isChat;
 }
 
-function handleAiChatSubmit(event) {
+async function handleAiChatSubmit(event) {
   event.preventDefault();
   const input = elements.aiChatInput.value.trim();
   if (!input) return;
   appendAiMessage('user', input);
   elements.aiChatInput.value = '';
-  setTimeout(() => {
-    appendAiMessage('assistant', `Placeholder response about "${input}"`);
-  }, 300);
+  try {
+    setAiChatBusy(true);
+    const response = await window.brain.aiChat({
+      message: input,
+      context: elements.aiContext.value,
+      selection: state.selected,
+    });
+    appendAiMessage('assistant', response.reply);
+  } catch (error) {
+    console.error(error);
+    appendAiMessage('assistant', `Error: ${error.message || 'AI chat failed'}`);
+    showToast(error.message || 'AI chat failed');
+  } finally {
+    setAiChatBusy(false);
+  }
 }
 
 function appendAiMessage(role, text) {
   const message = document.createElement('div');
   message.className = 'message';
   message.dataset.role = role;
-  message.textContent = `${role === 'user' ? 'You' : 'Assistant'}: ${text}`;
+  const label = role === 'user' ? 'You' : 'Assistant';
+  const safeText = escapeHtml(text).replace(/\n/g, '<br />');
+  message.innerHTML = `<strong>${label}</strong>: ${safeText}`;
   elements.aiChatHistory.appendChild(message);
   elements.aiChatHistory.scrollTop = elements.aiChatHistory.scrollHeight;
 }
@@ -773,16 +830,56 @@ async function handleAiToolClick(event) {
     return;
   }
   const action = event.target.dataset.action;
-  await window.brain.aiSnapshot(state.selected);
-  const result = await window.brain.aiApply({
-    ...state.selected,
-    action,
-  });
-  state.aiDraft = result;
-  renderAiDiff(result.diff);
-  elements.applyAi.disabled = false;
-  elements.discardAi.disabled = false;
-  elements.applyAiNew.disabled = false;
+  const context = elements.aiContext.value;
+  const payload = {};
+  if (action === 'merge') {
+    const space = state.tree.find((item) => item.name === state.selected.space);
+    const section = space?.sections.find((item) => item.name === state.selected.section);
+    const options = (section?.notes || [])
+      .filter((note) => note !== state.selected.note)
+      .map((note) => ({ value: note, label: note }));
+    if (!options.length) {
+      showToast('No other notes in this section to merge');
+      return;
+    }
+    const targetNote = await requestSelectDialog({
+      title: 'Merge with…',
+      label: 'Select note',
+      options,
+    });
+    if (!targetNote) return;
+    payload.targetNote = targetNote;
+  }
+  state.aiDraft = null;
+  elements.applyAi.disabled = true;
+  elements.discardAi.disabled = true;
+  elements.applyAiNew.disabled = true;
+  elements.aiDiff.innerHTML = '';
+  try {
+    setAiToolsBusy(true);
+    await window.brain.aiSnapshot(state.selected);
+    const result = await window.brain.aiApply({
+      ...state.selected,
+      action,
+      context,
+      payload,
+    });
+    state.aiDraft = result;
+    renderAiDiff(result.diff);
+    elements.applyAi.disabled = false;
+    elements.discardAi.disabled = false;
+    elements.applyAiNew.disabled = false;
+  } catch (error) {
+    console.error(error);
+    state.aiDraft = null;
+    elements.aiDiff.innerHTML = `<div class="ai-status error">${escapeHtml(error.message || 'AI action failed')}</div>`;
+    elements.applyAi.disabled = true;
+    elements.discardAi.disabled = true;
+    elements.applyAiNew.disabled = true;
+    showToast(error.message || 'AI action failed');
+  } finally {
+    setAiToolsBusy(false);
+  }
 }
 
 function renderAiDiff(diff) {
@@ -807,7 +904,11 @@ async function applyAiResult(mode) {
     return;
   }
   if (mode === 'new') {
-    const name = prompt('Name of new note');
+    const name = await requestTextDialog({
+      title: 'Save as new note',
+      label: 'Note name',
+      submitText: 'Create',
+    });
     if (!name) return;
     await window.brain.create({ type: 'note', space: state.selected.space, section: state.selected.section, name });
     await window.brain.writeNote({
@@ -886,6 +987,88 @@ function showToast(message) {
   setTimeout(() => {
     toast.remove();
   }, 2600);
+}
+
+function requestTextDialog({ title, label, defaultValue = '', submitText = 'Save', placeholder = '' }) {
+  return new Promise((resolve) => {
+    elements.entityDialogTitle.textContent = title;
+    elements.entityDialogLabel.textContent = label;
+    elements.entityDialogInput.value = defaultValue;
+    elements.entityDialogInput.placeholder = placeholder;
+    elements.entityDialogSubmit.textContent = submitText;
+    const onClose = () => {
+      elements.entityDialog.removeEventListener('close', onClose);
+      if (elements.entityDialog.returnValue === 'submit') {
+        resolve(elements.entityDialogInput.value.trim());
+      } else {
+        resolve(null);
+      }
+    };
+    elements.entityDialog.addEventListener('close', onClose, { once: true });
+    elements.entityDialog.showModal();
+    requestAnimationFrame(() => {
+      elements.entityDialogInput.focus();
+      elements.entityDialogInput.select();
+    });
+  });
+}
+
+function requestConfirmDialog({ title, message, confirmText = 'Confirm' }) {
+  return new Promise((resolve) => {
+    elements.confirmDialogTitle.textContent = title;
+    elements.confirmDialogMessage.textContent = message;
+    elements.confirmDialogConfirm.textContent = confirmText;
+    const onClose = () => {
+      elements.confirmDialog.removeEventListener('close', onClose);
+      resolve(elements.confirmDialog.returnValue === 'confirm');
+    };
+    elements.confirmDialog.addEventListener('close', onClose, { once: true });
+    elements.confirmDialog.showModal();
+  });
+}
+
+function requestSelectDialog({ title, label, options = [], defaultValue = '' }) {
+  return new Promise((resolve) => {
+    elements.selectDialogTitle.textContent = title;
+    elements.selectDialogLabel.textContent = label;
+    elements.selectDialogInput.innerHTML = '';
+    options.forEach((option) => {
+      const opt = document.createElement('option');
+      opt.value = option.value;
+      opt.textContent = option.label;
+      if (option.value === defaultValue) opt.selected = true;
+      elements.selectDialogInput.appendChild(opt);
+    });
+    const onClose = () => {
+      elements.selectDialog.removeEventListener('close', onClose);
+      if (elements.selectDialog.returnValue === 'submit') {
+        resolve(elements.selectDialogInput.value);
+      } else {
+        resolve(null);
+      }
+    };
+    elements.selectDialog.addEventListener('close', onClose, { once: true });
+    elements.selectDialog.showModal();
+    requestAnimationFrame(() => {
+      elements.selectDialogInput.focus();
+    });
+  });
+}
+
+function setAiToolsBusy(busy) {
+  elements.aiTools.setAttribute('aria-busy', busy ? 'true' : 'false');
+  elements.aiTools.querySelectorAll('button').forEach((button) => {
+    button.disabled = busy;
+  });
+  if (busy && !state.aiDraft) {
+    elements.aiDiff.innerHTML = '<div class="ai-status">Calling your local model…</div>';
+  }
+}
+
+function setAiChatBusy(busy) {
+  elements.aiChatForm.dataset.busy = busy ? 'true' : 'false';
+  elements.aiChatForm.querySelector('button[type="submit"]').disabled = busy;
+  elements.aiChatInput.disabled = busy;
 }
 
 function toggleSidebar() {

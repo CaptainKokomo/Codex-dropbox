@@ -2,6 +2,9 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 const STORAGE_DIR = path.join(process.cwd(), 'storage');
+const CONFIG_DIR = path.join(process.cwd(), 'config');
+const CONFIG_PATH = path.join(CONFIG_DIR, 'app.config.json');
+const CONFIG_TEMPLATE = path.join(CONFIG_DIR, 'app.config.example.json');
 const SPACES = [
   {
     name: 'Inbox',
@@ -57,6 +60,34 @@ async function createLaunchers() {
 
 async function bootstrap() {
   await ensureDir(STORAGE_DIR);
+  await ensureDir(CONFIG_DIR);
+  try {
+    await fs.access(CONFIG_PATH);
+  } catch {
+    try {
+      const template = await fs.readFile(CONFIG_TEMPLATE, 'utf8');
+      await fs.writeFile(CONFIG_PATH, template, 'utf8');
+    } catch {
+      await fs.writeFile(
+        CONFIG_PATH,
+        JSON.stringify(
+          {
+            llm: {
+              provider: 'openwebui',
+              baseUrl: 'http://127.0.0.1:3000',
+              endpoint: '/v1/chat/completions',
+              model: 'openchat',
+              temperature: 0.2,
+              apiKey: '',
+            },
+          },
+          null,
+          2
+        ),
+        'utf8'
+      );
+    }
+  }
   for (const space of SPACES) {
     const spaceDir = path.join(STORAGE_DIR, space.name);
     await ensureDir(spaceDir);

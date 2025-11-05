@@ -3,3 +3,4 @@ node_modules/
 storage/.snapshots/*
 npm-debug.log*
 .env
+config/app.config.json

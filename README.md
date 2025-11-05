@@ -12,6 +12,15 @@ An offline-first, markdown-native knowledge workspace with a tri-pane layout, AI
 
 The script opens the Electron desktop app without needing to run commands in a terminal each time.
 
+## Configure your local AI model
+
+1. After the first install a file named `config/app.config.json` is created from the included example.
+2. Point `llm.baseUrl` to your local model server (OpenWebUI defaults to `http://127.0.0.1:3000`).
+3. Adjust the `endpoint`, `model`, `temperature`, and optional `apiKey` values to match your setup.
+4. Restart the app (or reload with `Ctrl/Cmd+R`) after making changes; the watcher will automatically pick up the new settings.
+
+The assistant uses the OpenAI-compatible `/v1/chat/completions` API, so OpenWebUI or any server that mimics that contract will plug in without additional work.
+
 ## Keyboard Shortcuts
 
 - **Ctrl/Cmd + N** – Quick capture modal
@@ -25,6 +34,8 @@ The script opens the Electron desktop app without needing to run commands in a t
 Notes live in the local `storage/` directory using plain Markdown files with YAML frontmatter. You can edit them directly in any external editor if desired.
 
 Snapshots from AI actions are saved in `storage/.snapshots` (latest 20 versions per note).
+
+The quick actions (new space/section/note, rename, delete) now use inline dialogs inside the desktop shell so everything works without relying on browser prompts.
 
 ## Development
 

@@ -1,0 +1,10 @@
+{
+  "llm": {
+    "provider": "openwebui",
+    "baseUrl": "http://127.0.0.1:3000",
+    "endpoint": "/v1/chat/completions",
+    "model": "openchat",
+    "temperature": 0.2,
+    "apiKey": ""
+  }
+}

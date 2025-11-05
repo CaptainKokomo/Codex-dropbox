@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('brain', {
   structured: (payload) => ipcRenderer.invoke('storage:structured', payload),
   search: (payload) => ipcRenderer.invoke('storage:search', payload),
   aiApply: (payload) => ipcRenderer.invoke('ai:apply', payload),
+  aiChat: (payload) => ipcRenderer.invoke('ai:chat', payload),
   aiSnapshot: (payload) => ipcRenderer.invoke('ai:snapshot', payload),
   listSnapshots: (payload) => ipcRenderer.invoke('storage:snapshots', payload),
   readSnapshot: (payload) => ipcRenderer.invoke('storage:readSnapshot', payload),

@@ -12,14 +12,157 @@ const __dirname = path.dirname(__filename);
 
 const STORAGE_DIR = path.join(process.cwd(), 'storage');
 const SNAPSHOT_DIR = path.join(STORAGE_DIR, '.snapshots');
+const CONFIG_DIR = path.join(process.cwd(), 'config');
+const CONFIG_PATH = path.join(CONFIG_DIR, 'app.config.json');
 const md = new MarkdownIt();
 
 let mainWindow;
-let watcher;
+let storageWatcher;
+let configWatcher;
+let configCache;
+let fetchClient;
 
 const ensureStorage = async () => {
   await fs.mkdir(STORAGE_DIR, { recursive: true });
   await fs.mkdir(SNAPSHOT_DIR, { recursive: true });
+  await fs.mkdir(CONFIG_DIR, { recursive: true });
+};
+
+const loadConfig = async () => {
+  if (configCache) return configCache;
+  try {
+    const raw = await fs.readFile(CONFIG_PATH, 'utf8');
+    configCache = JSON.parse(raw);
+  } catch (err) {
+    console.warn('Config not found or invalid, using defaults', err?.message);
+    configCache = {
+      llm: {
+        baseUrl: 'http://127.0.0.1:3000',
+        endpoint: '/v1/chat/completions',
+        model: 'openchat',
+        temperature: 0.2,
+        apiKey: '',
+      },
+    };
+  }
+  return configCache;
+};
+
+const getFetchClient = async () => {
+  if (fetchClient) return fetchClient;
+  if (globalThis.fetch) {
+    fetchClient = globalThis.fetch.bind(globalThis);
+    return fetchClient;
+  }
+  const mod = await import('node-fetch');
+  fetchClient = mod.default;
+  return fetchClient;
+};
+
+const callLocalModel = async (messages, { maxTokens } = {}) => {
+  const config = await loadConfig();
+  const llm = config.llm || {};
+  if (!llm.baseUrl) {
+    throw new Error('Configure your local model in config/app.config.json');
+  }
+  const baseUrl = llm.baseUrl.replace(/\/$/, '');
+  const endpoint = llm.endpoint || '/v1/chat/completions';
+  const url = new URL(endpoint, `${baseUrl}/`);
+  const headers = { 'Content-Type': 'application/json' };
+  if (llm.apiKey) {
+    headers.Authorization = `Bearer ${llm.apiKey}`;
+  }
+  const payload = {
+    model: llm.model || 'openchat',
+    temperature: typeof llm.temperature === 'number' ? llm.temperature : 0.2,
+    stream: false,
+    messages,
+  };
+  if (maxTokens) {
+    payload.max_tokens = maxTokens;
+  } else if (llm.maxTokens) {
+    payload.max_tokens = llm.maxTokens;
+  }
+  const fetcher = await getFetchClient();
+  let response;
+  try {
+    response = await fetcher(url.toString(), {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
+  } catch (err) {
+    throw new Error(`Unable to reach local model at ${baseUrl}: ${err.message || err}`);
+  }
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Local model request failed (${response.status}): ${text.slice(0, 240)}`);
+  }
+  const data = await response.json();
+  const content = data?.choices?.[0]?.message?.content?.trim();
+  if (!content) {
+    throw new Error('Local model returned no content');
+  }
+  return content;
+};
+
+const trimContext = (text, limit = 12000) => {
+  if (!text) return '';
+  if (text.length <= limit) return text;
+  return `${text.slice(0, limit)}\n\n… context truncated …`;
+};
+
+const buildActionPrompt = (action, payload) => {
+  switch (action) {
+    case 'summarize':
+      return 'Summarize the provided markdown for an ADHD-friendly reader. Return Markdown that begins with a "## Summary" section containing bullet points, followed by any high-value lists or tasks. Preserve critical details but keep it concise.';
+    case 'cleanup':
+      return 'Rewrite the markdown for clarity and flow. Keep the same structure and headings while fixing grammar, removing redundancy, and tightening wording. Return the improved markdown.';
+    case 'tasks':
+      return 'Extract actionable tasks from the context. Return only a Markdown checklist using "- [ ]" or "- [x]" lines. If no tasks exist, return "- [ ] No tasks found".';
+    case 'outline':
+      return 'Create a Markdown outline of the key points and hierarchy. Use nested bullet lists and short headings. Do not copy the entire note, only the outline.';
+    case 'merge':
+      return payload?.targetNote
+        ? `Combine the primary note with the target note "${payload.targetNote}". Produce a single cohesive Markdown note that keeps important sections from both.`
+        : 'Combine the provided notes into a cohesive Markdown document.';
+    default:
+      return 'Return an improved Markdown version of the provided context.';
+  }
+};
+
+const gatherContextText = async (selection, scope, extra = {}) => {
+  if (!selection?.space || !selection?.section || !selection?.note) return '';
+  const { space, section, note } = selection;
+  let content = '';
+  if (scope === 'note') {
+    const current = await readNote(space, section, note);
+    content = `# ${note}\n\n${current.body}`;
+  } else if (scope === 'section') {
+    const notes = await getNotes(space, section);
+    const chunks = [];
+    for (const entry of notes) {
+      const data = await readNote(space, section, entry);
+      chunks.push(`## ${entry}\n\n${data.body}`);
+    }
+    content = chunks.join('\n\n---\n\n');
+  } else if (scope === 'space') {
+    const sections = await getSections(space);
+    const chunks = [];
+    for (const sec of sections) {
+      const notes = await getNotes(space, sec);
+      for (const entry of notes) {
+        const data = await readNote(space, sec, entry);
+        chunks.push(`# ${sec} / ${entry}\n\n${data.body}`);
+      }
+    }
+    content = chunks.join('\n\n---\n\n');
+  }
+  if (extra?.targetNote) {
+    const data = await readNote(space, section, extra.targetNote);
+    content = `${content}\n\n---\nTarget note (${extra.targetNote}):\n\n${data.body}`;
+  }
+  return content;
 };
 
 const getSpaces = async () => {
@@ -193,67 +336,64 @@ const buildSnippet = (content, query) => {
   return content.slice(Math.max(0, idx - 40), idx + 80) + '…';
 };
 
-const applyAiAction = async ({ space, section, note, action, payload }) => {
-  const noteData = await readNote(space, section, note);
-  const text = noteData.body;
-  let output = text;
-  switch (action) {
-    case 'summarize':
-      output = summarize(text);
-      break;
-    case 'cleanup':
-      output = cleanup(text);
-      break;
-    case 'tasks':
-      output = extractTasks(text);
-      break;
-    case 'outline':
-      output = outline(text);
-      break;
-    case 'merge':
-      output = await mergeNotes(space, section, note, payload?.targetNote);
-      break;
-    default:
-      break;
+const applyAiAction = async ({ space, section, note, action, payload = {}, context = 'note' }) => {
+  try {
+    const selection = { space, section, note };
+    const noteData = await readNote(space, section, note);
+    const contextText = await gatherContextText(selection, context, payload);
+    const trimmed = trimContext(contextText || `# ${note}\n\n${noteData.body}`);
+    const instructions = buildActionPrompt(action, payload);
+    const messages = [
+      {
+        role: 'system',
+        content:
+          'You are My Own Damn Second Brain, an offline-first Markdown assistant. Return valid Markdown only, no explanations or JSON.',
+      },
+      {
+        role: 'user',
+        content: `${instructions}\n\n<context>\n${trimmed}\n</context>`,
+      },
+    ];
+    const output = await callLocalModel(messages, { maxTokens: action === 'merge' ? 2400 : 1500 });
+    const diff = diffLines(noteData.body, output).map((part) => ({
+      added: part.added || false,
+      removed: part.removed || false,
+      value: part.value,
+    }));
+    return { output, diff };
+  } catch (error) {
+    console.error('AI action failed', error);
+    throw error;
   }
-  const diff = diffLines(text, output).map((part) => ({
-    added: part.added || false,
-    removed: part.removed || false,
-    value: part.value,
-  }));
-  return { output, diff };
 };
 
-const summarize = (text) => {
-  const lines = text.split(/\n/);
-  const important = lines.filter((line) => line.startsWith('#') || line.startsWith('- [ ]') || line.startsWith('- [x]'));
-  const summary = important.slice(0, 6).join('\n');
-  return summary || text.split(/\n/).slice(0, 40).join('\n');
-};
-
-const cleanup = (text) => {
-  return text
-    .replace(/\s+$/gm, '')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-};
-
-const extractTasks = (text) => {
-  const matches = text.match(/- \[( |x)\] .+/g);
-  if (!matches) return '- [ ] No tasks found';
-  return matches.join('\n');
-};
-
-const outline = (text) => {
-  const headings = text.match(/^#+ .+/gm) || [];
-  return headings.map((heading, index) => `${index + 1}. ${heading.replace(/^#+\s*/, '')}`).join('\n');
-};
-
-const mergeNotes = async (space, section, note, targetNote) => {
-  if (!targetNote) return (await readNote(space, section, note)).body;
-  const primary = await readNote(space, section, note);
-  const target = await readNote(space, section, targetNote);
-  return `${primary.body}\n\n---\nMerged with ${targetNote}\n\n${target.body}`;
+const chatWithAi = async ({ message, context: scope = 'note', selection }) => {
+  if (!message) {
+    throw new Error('Message is required');
+  }
+  let contextSnippet = '';
+  if (selection?.space && selection?.section && selection?.note) {
+    const contextText = await gatherContextText(selection, scope);
+    contextSnippet = trimContext(contextText);
+  }
+  const messages = [
+    {
+      role: 'system',
+      content:
+        'You are My Own Damn Second Brain, an offline-first knowledge assistant. Answer using Markdown. Be concise, action-focused, and cite note titles inline when referencing them.',
+    },
+    {
+      role: 'user',
+      content: `${contextSnippet ? `Context:\n${contextSnippet}\n\n` : ''}Question: ${message}`,
+    },
+  ];
+  try {
+    const reply = await callLocalModel(messages, { maxTokens: 1200 });
+    return { reply };
+  } catch (error) {
+    console.error('AI chat failed', error);
+    throw error;
+  }
 };
 
 const quickCapture = async (title, content) => {
@@ -449,6 +589,7 @@ const registerIpc = () => {
   ipcMain.handle('storage:search', async (_, payload) => handleSearch(payload));
 
   ipcMain.handle('ai:apply', async (_, payload) => applyAiAction(payload));
+  ipcMain.handle('ai:chat', async (_, payload) => chatWithAi(payload));
 
   ipcMain.handle('ai:snapshot', async (_, payload) => {
     await createSnapshot(payload.space, payload.section, payload.note);
@@ -462,11 +603,17 @@ const registerIpc = () => {
 };
 
 const watchStorage = () => {
-  watcher = chokidar.watch(STORAGE_DIR, { ignoreInitial: true, depth: 3 });
-  watcher.on('all', (_event, _path) => {
+  if (storageWatcher) storageWatcher.close();
+  if (configWatcher) configWatcher.close();
+  storageWatcher = chokidar.watch(STORAGE_DIR, { ignoreInitial: true, depth: 3 });
+  storageWatcher.on('all', () => {
     if (mainWindow) {
       mainWindow.webContents.send('storage:updated');
     }
+  });
+  configWatcher = chokidar.watch(CONFIG_PATH, { ignoreInitial: true });
+  configWatcher.on('change', () => {
+    configCache = null;
   });
 };
 
@@ -506,5 +653,6 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
-  if (watcher) watcher.close();
+  if (storageWatcher) storageWatcher.close();
+  if (configWatcher) configWatcher.close();
 });

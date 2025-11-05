@@ -78,13 +78,13 @@
     <div id="contextMenu" class="context-menu" hidden role="menu"></div>
 
     <dialog id="quickCaptureDialog" class="modal">
-      <form method="dialog">
+      <form id="quickCaptureForm">
         <h2>Quick Capture</h2>
         <label>Title<input type="text" id="quickCaptureTitle" /></label>
-        <label>Content<textarea id="quickCaptureContent" rows="6"></textarea></label>
+        <label>Content<textarea id="quickCaptureContent" rows="6" required></textarea></label>
         <menu>
-          <button value="cancel">Cancel</button>
-          <button value="submit" class="primary">Save</button>
+          <button type="button" id="quickCaptureCancel">Cancel</button>
+          <button type="submit" class="primary">Save</button>
         </menu>
       </form>
     </dialog>
@@ -119,6 +119,45 @@
     </dialog>
 
     <div id="toastContainer" class="toast-container" role="status" aria-live="polite"></div>
+
+    <dialog id="entityDialog" class="modal">
+      <form method="dialog">
+        <h2 id="entityDialogTitle"></h2>
+        <label>
+          <span id="entityDialogLabel"></span>
+          <input type="text" id="entityDialogInput" required />
+        </label>
+        <menu>
+          <button value="cancel">Cancel</button>
+          <button value="submit" class="primary" id="entityDialogSubmit">Save</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="confirmDialog" class="modal">
+      <form method="dialog">
+        <h2 id="confirmDialogTitle"></h2>
+        <p id="confirmDialogMessage"></p>
+        <menu>
+          <button value="cancel">Cancel</button>
+          <button value="confirm" class="danger" id="confirmDialogConfirm">Confirm</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="selectDialog" class="modal">
+      <form method="dialog">
+        <h2 id="selectDialogTitle"></h2>
+        <label>
+          <span id="selectDialogLabel"></span>
+          <select id="selectDialogInput"></select>
+        </label>
+        <menu>
+          <button value="cancel">Cancel</button>
+          <button value="submit" class="primary" id="selectDialogSubmit">Select</button>
+        </menu>
+      </form>
+    </dialog>
 
     <script type="module" src="app.js"></script>
   </body>
