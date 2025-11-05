@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Own Damn Second Brain</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside class="sidebar" data-zone="sidebar">
+        <header class="sidebar__header">
+          <h1>Spaces</h1>
+          <div class="sidebar__actions">
+            <button id="toggleSidebar" title="Collapse sidebar" aria-label="Collapse sidebar">⟨</button>
+            <button id="newSpace" class="primary" title="New Space">＋</button>
+          </div>
+        </header>
+        <nav class="sidebar__tree" id="spaceTree" tabindex="0" aria-label="Spaces navigation"></nav>
+        <footer class="sidebar__footer">
+          <button id="quickCaptureBtn" class="primary">+ Quick Note</button>
+          <button id="toggleTags"># Tags</button>
+        </footer>
+        <section class="sidebar__tags" id="tagList" hidden></section>
+      </aside>
+      <main class="workspace" data-zone="workspace">
+        <header class="workspace__header">
+          <div class="breadcrumbs" id="breadcrumbs"></div>
+          <div class="workspace__actions">
+            <button id="openSearch" title="Search (Ctrl+K)">🔍</button>
+            <button id="openVersions" title="Versions">🕒</button>
+          </div>
+        </header>
+        <section class="editor" id="editor" tabindex="0"></section>
+        <footer class="workspace__footer">
+          <div id="tagsDisplay"></div>
+          <div id="backlinksDisplay"></div>
+        </footer>
+      </main>
+      <aside class="ai-pane" data-zone="ai">
+        <header class="ai-pane__header">
+          <nav class="ai-pane__tabs" role="tablist">
+            <button role="tab" aria-selected="true" id="aiTabChat">Chat</button>
+            <button role="tab" aria-selected="false" id="aiTabTools">Tools</button>
+          </nav>
+          <select id="aiContext">
+            <option value="note">This Note</option>
+            <option value="section">This Folder</option>
+            <option value="space">Entire Space</option>
+          </select>
+        </header>
+        <section id="aiChat" role="tabpanel" aria-labelledby="aiTabChat" class="ai-pane__panel">
+          <div id="aiChatHistory" class="ai-chat__history"></div>
+          <form id="aiChatForm" class="ai-chat__form">
+            <input type="text" id="aiChatInput" placeholder="Ask the assistant…" aria-label="Ask the assistant" />
+            <button type="submit">Send</button>
+          </form>
+        </section>
+        <section id="aiTools" role="tabpanel" aria-labelledby="aiTabTools" class="ai-pane__panel" hidden>
+          <div class="ai-tools">
+            <button data-action="summarize">Summarize</button>
+            <button data-action="cleanup">Clean up writing</button>
+            <button data-action="tasks">Extract tasks</button>
+            <button data-action="outline">Outline</button>
+            <button data-action="merge">Merge with another note</button>
+          </div>
+          <div id="aiDiff" class="ai-diff" aria-live="polite"></div>
+          <div class="ai-diff__actions">
+            <button id="applyAi" disabled>Apply</button>
+            <button id="discardAi" disabled>Discard</button>
+            <button id="applyAiNew" disabled>Apply to New Note</button>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <div id="contextMenu" class="context-menu" hidden role="menu"></div>
+
+    <dialog id="quickCaptureDialog" class="modal">
+      <form method="dialog">
+        <h2>Quick Capture</h2>
+        <label>Title<input type="text" id="quickCaptureTitle" /></label>
+        <label>Content<textarea id="quickCaptureContent" rows="6"></textarea></label>
+        <menu>
+          <button value="cancel">Cancel</button>
+          <button value="submit" class="primary">Save</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="searchDialog" class="modal">
+      <form method="dialog" id="searchForm">
+        <header>
+          <h2>Search</h2>
+          <select id="searchMode">
+            <option value="text">Text</option>
+            <option value="semantic">Semantic</option>
+          </select>
+        </header>
+        <input type="search" id="searchInput" placeholder="Search notes" autocomplete="off" />
+        <ul id="searchResults" class="search-results"></ul>
+        <menu>
+          <button value="close">Close</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="versionsDialog" class="modal">
+      <form method="dialog" id="versionsForm">
+        <h2>Versions</h2>
+        <ul id="versionsList" class="versions-list"></ul>
+        <section id="versionPreview"></section>
+        <menu>
+          <button value="close">Close</button>
+          <button value="restore" class="primary">Restore</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <div id="toastContainer" class="toast-container" role="status" aria-live="polite"></div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

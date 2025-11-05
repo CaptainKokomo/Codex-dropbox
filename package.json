@@ -1,0 +1,21 @@
+{
+  "name": "my-own-damn-second-brain",
+  "version": "0.1.0",
+  "description": "Local-first markdown knowledge tool with tri-pane interface",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "diff": "^5.2.0",
+    "gray-matter": "^4.0.3",
+    "markdown-it": "^13.0.2"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3"
+  }
+}
