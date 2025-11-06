@@ -698,7 +698,9 @@ const createWindow = async () => {
     backgroundColor: '#11131a',
     title: 'My Own Damn Second Brain',
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.cjs'),
+      contextIsolation: true,
+      sandbox: false,
     },
   });
 
