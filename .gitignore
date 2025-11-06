@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+storage/.snapshots/*
+npm-debug.log*
+.env
+config/app.config.json
