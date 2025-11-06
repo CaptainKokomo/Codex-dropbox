@@ -1,14 +1,31 @@
-if (!window?.brain) {
+function renderDesktopShellError(message = 'Desktop APIs unavailable') {
   const fallback = document.createElement('section');
   fallback.className = 'fatal-error';
   fallback.innerHTML = `
     <h1>Desktop shell not detected</h1>
     <p>This UI needs the Electron desktop app to run. Use the launchers in the project folder or <strong>npm start</strong>.</p>
     <p>If you opened <code>renderer/index.html</code> directly in a browser, close it and launch the desktop build instead.</p>
+    <p class="fatal-error__details">${message}</p>
   `;
   document.body.innerHTML = '';
   document.body.appendChild(fallback);
-  throw new Error('Desktop APIs unavailable');
+}
+
+async function ensureDesktopBridge({ attempts = 40, interval = 50 } = {}) {
+  if (window?.brain) return window.brain;
+  return new Promise((resolve, reject) => {
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries += 1;
+      if (window?.brain) {
+        clearInterval(timer);
+        resolve(window.brain);
+      } else if (tries >= attempts) {
+        clearInterval(timer);
+        reject(new Error('Desktop APIs unavailable'));
+      }
+    }, interval);
+  });
 }
 
 const state = {
@@ -1239,4 +1256,11 @@ function setupGlobalErrorHandling() {
   });
 }
 
-init();
+ensureDesktopBridge()
+  .then(() => {
+    init();
+  })
+  .catch((error) => {
+    console.error(error);
+    renderDesktopShellError(error?.message || 'Desktop APIs unavailable');
+  });

@@ -48,6 +48,11 @@ body {
   max-width: 540px;
 }
 
+.fatal-error__details {
+  font-size: 0.85rem;
+  color: var(--text-subtle);
+}
+
 button,
 input,
 select,
