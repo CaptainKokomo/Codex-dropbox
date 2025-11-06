@@ -16,8 +16,15 @@ contextBridge.exposeInMainWorld('brain', {
   listSnapshots: (payload) => ipcRenderer.invoke('storage:snapshots', payload),
   readSnapshot: (payload) => ipcRenderer.invoke('storage:readSnapshot', payload),
   quickCapture: (payload) => ipcRenderer.invoke('quickCapture', payload),
+  getConfig: () => ipcRenderer.invoke('config:get'),
+  saveConfig: (payload) => ipcRenderer.invoke('config:set', payload),
+  aiStatus: () => ipcRenderer.invoke('ai:status'),
   onStorageUpdate: (callback) => {
     ipcRenderer.removeAllListeners('storage:updated');
     ipcRenderer.on('storage:updated', callback);
+  },
+  onConfigUpdate: (callback) => {
+    ipcRenderer.removeAllListeners('config:updated');
+    ipcRenderer.on('config:updated', callback);
   },
 });

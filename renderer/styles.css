@@ -28,6 +28,26 @@ body {
   overflow: hidden;
 }
 
+.fatal-error {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  text-align: center;
+  padding: 2rem;
+  gap: 1rem;
+}
+
+.fatal-error h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.fatal-error p {
+  margin: 0;
+  color: var(--text-muted);
+  max-width: 540px;
+}
+
 button,
 input,
 select,
@@ -258,6 +278,69 @@ button:focus-visible {
   background: var(--bg-elevated);
   display: flex;
   flex-direction: column;
+}
+
+.ai-pane__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.ai-pane__status[data-connected='true'] {
+  color: var(--text);
+}
+
+.ai-status-text {
+  flex: 1;
+}
+
+.status-dot {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: var(--border-strong);
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  transition: box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.status-dot[data-status='online'] {
+  background: var(--success);
+  box-shadow: 0 0 8px rgba(95, 255, 176, 0.6);
+}
+
+.status-dot[data-status='offline'] {
+  background: var(--danger);
+  box-shadow: 0 0 8px rgba(255, 95, 109, 0.6);
+}
+
+.status-dot[data-status='checking'] {
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(108, 140, 255, 0.5);
+}
+
+.link-button {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  padding: 0;
+  font-size: 0.8rem;
+  text-decoration: underline;
+}
+
+.link-button:hover:not(:disabled),
+.link-button:focus-visible {
+  border: none;
+  text-decoration: none;
+}
+
+.link-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: none;
 }
 
 .ai-pane__header {

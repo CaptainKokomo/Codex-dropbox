@@ -14,10 +14,11 @@ The script opens the Electron desktop app without needing to run commands in a t
 
 ## Configure your local AI model
 
-1. After the first install a file named `config/app.config.json` is created from the included example.
-2. Point `llm.baseUrl` to your local model server (OpenWebUI defaults to `http://127.0.0.1:3000`).
-3. Adjust the `endpoint`, `model`, `temperature`, and optional `apiKey` values to match your setup.
-4. Restart the app (or reload with `Ctrl/Cmd+R`) after making changes; the watcher will automatically pick up the new settings.
+1. Open the app and click **Configure** in the AI pane to edit the local model settings.
+2. Point the **Base URL** to your OpenWebUI (or compatible) server. Defaults to `http://127.0.0.1:3000`.
+3. Adjust the **Endpoint**, **Model**, **Temperature**, and optional **API key** and press **Save**. The connection status updates instantly.
+
+You can still edit `config/app.config.json` manually if you prefer; the desktop shell watches the file and refreshes the configuration live.
 
 The assistant uses the OpenAI-compatible `/v1/chat/completions` API, so OpenWebUI or any server that mimics that contract will plug in without additional work.
 

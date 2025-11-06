@@ -1,3 +1,16 @@
+if (!window?.brain) {
+  const fallback = document.createElement('section');
+  fallback.className = 'fatal-error';
+  fallback.innerHTML = `
+    <h1>Desktop shell not detected</h1>
+    <p>This UI needs the Electron desktop app to run. Use the launchers in the project folder or <strong>npm start</strong>.</p>
+    <p>If you opened <code>renderer/index.html</code> directly in a browser, close it and launch the desktop build instead.</p>
+  `;
+  document.body.innerHTML = '';
+  document.body.appendChild(fallback);
+  throw new Error('Desktop APIs unavailable');
+}
+
 const state = {
   tree: [],
   selected: null,
@@ -47,6 +60,11 @@ const elements = {
   discardAi: document.getElementById('discardAi'),
   applyAiNew: document.getElementById('applyAiNew'),
   aiContext: document.getElementById('aiContext'),
+  aiStatusBar: document.getElementById('aiStatusBar'),
+  aiStatusText: document.getElementById('aiStatusText'),
+  aiStatusDot: document.getElementById('aiStatusDot'),
+  testAi: document.getElementById('testAi'),
+  openAiSettings: document.getElementById('openAiSettings'),
   openSearch: document.getElementById('openSearch'),
   openVersions: document.getElementById('openVersions'),
   newSpace: document.getElementById('newSpace'),
@@ -66,17 +84,28 @@ const elements = {
   selectDialogLabel: document.getElementById('selectDialogLabel'),
   selectDialogInput: document.getElementById('selectDialogInput'),
   selectDialogSubmit: document.getElementById('selectDialogSubmit'),
+  aiConfigDialog: document.getElementById('aiConfigDialog'),
+  aiConfigForm: document.getElementById('aiConfigForm'),
+  aiConfigBaseUrl: document.getElementById('aiConfigBaseUrl'),
+  aiConfigEndpoint: document.getElementById('aiConfigEndpoint'),
+  aiConfigModel: document.getElementById('aiConfigModel'),
+  aiConfigTemperature: document.getElementById('aiConfigTemperature'),
+  aiConfigApiKey: document.getElementById('aiConfigApiKey'),
+  aiConfigCancel: document.getElementById('aiConfigCancel'),
 };
 
 async function init() {
+  setupGlobalErrorHandling();
   await refreshTree();
   bindEvents();
   elements.editor.addEventListener('keydown', handleEditorKeydown);
   elements.editor.addEventListener('input', debounce(handleEditorInput, 250));
   window.addEventListener('keydown', handleGlobalShortcuts);
   window.brain.onStorageUpdate(() => refreshTree(false));
+  window.brain.onConfigUpdate(() => loadAiStatus({ silent: true }));
   renderEmptyState();
   loadTags();
+  loadAiStatus({ silent: true });
 }
 
 function bindEvents() {
@@ -118,6 +147,11 @@ function bindEvents() {
   elements.applyAiNew.addEventListener('click', () => applyAiResult('new'));
   elements.newSpace.addEventListener('click', () => promptCreate('space'));
   elements.toggleSidebar.addEventListener('click', toggleSidebar);
+  elements.testAi.addEventListener('click', () => loadAiStatus());
+  elements.openAiSettings.addEventListener('click', openAiConfig);
+  elements.aiConfigForm.addEventListener('submit', handleAiConfigSubmit);
+  elements.aiConfigCancel.addEventListener('click', () => elements.aiConfigDialog.close());
+  elements.aiConfigDialog.addEventListener('cancel', () => elements.aiConfigDialog.close());
   document.addEventListener('click', handleGlobalClick);
 }
 
@@ -789,6 +823,100 @@ function switchAiTab(tab) {
   elements.aiToolsPanel.hidden = isChat;
 }
 
+async function loadAiStatus({ silent = false } = {}) {
+  if (!elements.aiStatusBar) return;
+  updateAiStatus({ state: 'checking', message: 'Checking connection…' });
+  elements.testAi.disabled = true;
+  try {
+    const status = await window.brain.aiStatus();
+    updateAiStatus(status);
+    if (!silent) {
+      showToast(status.connected ? 'AI connected' : status.message || 'Local model offline');
+    }
+  } catch (error) {
+    console.error(error);
+    updateAiStatus({ connected: false, message: error?.message || 'Status check failed' });
+    if (!silent) {
+      showToast(error?.message || 'Unable to reach local model');
+    }
+  } finally {
+    elements.testAi.disabled = false;
+  }
+}
+
+function updateAiStatus(status = {}) {
+  if (!elements.aiStatusBar) return;
+  const { connected, message, latency, state } = status;
+  const dotState = state || (connected ? 'online' : message ? 'offline' : 'checking');
+  elements.aiStatusDot.dataset.status = dotState;
+  const text = connected
+    ? latency
+      ? `Connected (${latency}ms)`
+      : message || 'Connected'
+    : message || 'Waiting for configuration…';
+  elements.aiStatusText.textContent = text;
+  elements.aiStatusBar.dataset.connected = connected ? 'true' : 'false';
+}
+
+async function openAiConfig() {
+  try {
+    const config = await window.brain.getConfig();
+    const llm = config?.llm || {};
+    elements.aiConfigBaseUrl.value = llm.baseUrl || '';
+    elements.aiConfigEndpoint.value = llm.endpoint || '/v1/chat/completions';
+    elements.aiConfigModel.value = llm.model || '';
+    elements.aiConfigTemperature.value =
+      typeof llm.temperature === 'number' ? llm.temperature.toString() : '';
+    elements.aiConfigApiKey.value = llm.apiKey || '';
+    elements.aiConfigDialog.showModal();
+    requestAnimationFrame(() => {
+      elements.aiConfigBaseUrl.focus();
+      elements.aiConfigBaseUrl.select();
+    });
+  } catch (error) {
+    console.error(error);
+    showToast('Unable to load AI settings');
+  }
+}
+
+async function handleAiConfigSubmit(event) {
+  event.preventDefault();
+  const baseUrl = elements.aiConfigBaseUrl.value.trim();
+  const endpoint = elements.aiConfigEndpoint.value.trim() || '/v1/chat/completions';
+  const model = elements.aiConfigModel.value.trim();
+  if (!baseUrl || !model) {
+    showToast('Base URL and model are required');
+    return;
+  }
+  const temperatureRaw = elements.aiConfigTemperature.value.trim();
+  const temperature = temperatureRaw ? parseFloat(temperatureRaw) : undefined;
+  const payload = {
+    llm: {
+      baseUrl,
+      endpoint,
+      model,
+    },
+  };
+  if (!Number.isNaN(temperature) && temperature !== undefined) {
+    payload.llm.temperature = temperature;
+  }
+  const apiKey = elements.aiConfigApiKey.value.trim();
+  if (apiKey) {
+    payload.llm.apiKey = apiKey;
+  } else {
+    payload.llm.apiKey = '';
+  }
+  try {
+    await window.brain.saveConfig(payload);
+    elements.aiConfigDialog.close();
+    showToast('AI settings saved');
+    loadAiStatus({ silent: true });
+  } catch (error) {
+    console.error(error);
+    showToast('Failed to save AI settings');
+  }
+}
+
 async function handleAiChatSubmit(event) {
   event.preventDefault();
   const input = elements.aiChatInput.value.trim();
@@ -1088,6 +1216,27 @@ function debounce(fn, delay) {
     clearTimeout(timeout);
     timeout = setTimeout(() => fn.apply(null, args), delay);
   };
+}
+
+function setupGlobalErrorHandling() {
+  let lastMessage = '';
+  window.addEventListener('error', (event) => {
+    const message = event?.message || 'Renderer error occurred';
+    console.error(event.error || message);
+    if (message !== lastMessage) {
+      showToast(message);
+      lastMessage = message;
+    }
+  });
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event.reason;
+    const message = reason?.message || String(reason) || 'Unhandled promise rejection';
+    console.error(reason);
+    if (message !== lastMessage) {
+      showToast(message);
+      lastMessage = message;
+    }
+  });
 }
 
 init();

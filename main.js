@@ -21,6 +21,7 @@ let storageWatcher;
 let configWatcher;
 let configCache;
 let fetchClient;
+let aiStatusCache;
 
 const ensureStorage = async () => {
   await fs.mkdir(STORAGE_DIR, { recursive: true });
@@ -48,6 +49,24 @@ const loadConfig = async () => {
   return configCache;
 };
 
+const saveConfig = async (nextConfig) => {
+  await fs.mkdir(CONFIG_DIR, { recursive: true });
+  const current = await loadConfig();
+  const merged = {
+    ...current,
+    ...nextConfig,
+    llm: { ...(current?.llm || {}), ...(nextConfig?.llm || {}) },
+  };
+  const serialised = JSON.stringify(merged, null, 2);
+  await fs.writeFile(CONFIG_PATH, serialised, 'utf8');
+  configCache = merged;
+  aiStatusCache = null;
+  if (mainWindow) {
+    mainWindow.webContents.send('config:updated');
+  }
+  return merged;
+};
+
 const getFetchClient = async () => {
   if (fetchClient) return fetchClient;
   if (globalThis.fetch) {
@@ -63,7 +82,7 @@ const callLocalModel = async (messages, { maxTokens } = {}) => {
   const config = await loadConfig();
   const llm = config.llm || {};
   if (!llm.baseUrl) {
-    throw new Error('Configure your local model in config/app.config.json');
+    throw new Error('Configure your local model via the AI settings dialog.');
   }
   const baseUrl = llm.baseUrl.replace(/\/$/, '');
   const endpoint = llm.endpoint || '/v1/chat/completions';
@@ -104,6 +123,48 @@ const callLocalModel = async (messages, { maxTokens } = {}) => {
     throw new Error('Local model returned no content');
   }
   return content;
+};
+
+const checkAiStatus = async () => {
+  if (aiStatusCache && Date.now() - aiStatusCache.timestamp < 15_000) {
+    return aiStatusCache.status;
+  }
+  try {
+    const config = await loadConfig();
+    const llm = config.llm || {};
+    if (!llm.baseUrl) {
+      return { connected: false, message: 'Set the local model URL in AI settings.' };
+    }
+    const start = Date.now();
+    await callLocalModel(
+      [
+        {
+          role: 'system',
+          content:
+            'You are a diagnostics helper. Respond with a short acknowledgement such as "online".',
+        },
+        { role: 'user', content: 'Say "online" if you received this.' },
+      ],
+      { maxTokens: 4 }
+    );
+    const latency = Date.now() - start;
+    aiStatusCache = {
+      timestamp: Date.now(),
+      status: {
+        connected: true,
+        latency,
+        message: `Connected in ${latency}ms`,
+      },
+    };
+    return aiStatusCache.status;
+  } catch (error) {
+    const status = {
+      connected: false,
+      message: error?.message || 'Unable to reach local model',
+    };
+    aiStatusCache = { timestamp: Date.now(), status };
+    return status;
+  }
 };
 
 const trimContext = (text, limit = 12000) => {
@@ -600,6 +661,12 @@ const registerIpc = () => {
   ipcMain.handle('storage:readSnapshot', async (_, payload) => readSnapshot(payload.file));
 
   ipcMain.handle('quickCapture', async (_, payload) => quickCapture(payload.title, payload.content));
+
+  ipcMain.handle('config:get', async () => loadConfig());
+  ipcMain.handle('config:set', async (_, payload) => {
+    return saveConfig(payload);
+  });
+  ipcMain.handle('ai:status', async () => checkAiStatus());
 };
 
 const watchStorage = () => {
@@ -614,6 +681,10 @@ const watchStorage = () => {
   configWatcher = chokidar.watch(CONFIG_PATH, { ignoreInitial: true });
   configWatcher.on('change', () => {
     configCache = null;
+    aiStatusCache = null;
+    if (mainWindow) {
+      mainWindow.webContents.send('config:updated');
+    }
   });
 };
 

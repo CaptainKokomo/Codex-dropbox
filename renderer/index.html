@@ -50,6 +50,12 @@
             <option value="space">Entire Space</option>
           </select>
         </header>
+        <div class="ai-pane__status" id="aiStatusBar">
+          <span class="status-dot" id="aiStatusDot" data-status="checking" aria-hidden="true"></span>
+          <span id="aiStatusText" class="ai-status-text">Checking connection…</span>
+          <button type="button" id="testAi" class="link-button">Test</button>
+          <button type="button" id="openAiSettings" class="link-button">Configure</button>
+        </div>
         <section id="aiChat" role="tabpanel" aria-labelledby="aiTabChat" class="ai-pane__panel">
           <div id="aiChatHistory" class="ai-chat__history"></div>
           <form id="aiChatForm" class="ai-chat__form">
@@ -155,6 +161,36 @@
         <menu>
           <button value="cancel">Cancel</button>
           <button value="submit" class="primary" id="selectDialogSubmit">Select</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="aiConfigDialog" class="modal">
+      <form id="aiConfigForm">
+        <h2>AI Settings</h2>
+        <label>
+          <span>Base URL</span>
+          <input type="url" id="aiConfigBaseUrl" placeholder="http://127.0.0.1:3000" required />
+        </label>
+        <label>
+          <span>Endpoint</span>
+          <input type="text" id="aiConfigEndpoint" placeholder="/v1/chat/completions" required />
+        </label>
+        <label>
+          <span>Model name</span>
+          <input type="text" id="aiConfigModel" placeholder="openchat" required />
+        </label>
+        <label>
+          <span>Temperature</span>
+          <input type="number" step="0.1" min="0" max="1" id="aiConfigTemperature" />
+        </label>
+        <label>
+          <span>API key (optional)</span>
+          <input type="text" id="aiConfigApiKey" autocomplete="off" />
+        </label>
+        <menu>
+          <button type="button" id="aiConfigCancel">Cancel</button>
+          <button type="submit" class="primary">Save</button>
         </menu>
       </form>
     </dialog>
