@@ -1,0 +1,45 @@
+{
+  "name": "nodelab",
+  "version": "0.1.0",
+  "description": "NodeLab – interactive electronics bench (Stage 0)",
+  "author": "",
+  "license": "Proprietary",
+  "type": "module",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "clean": "rm -rf dist release",
+    "build": "npm run build:main && npm run build:preload && npm run build:renderer && node scripts/copy-static.mjs",
+    "build:main": "esbuild electron/main.ts --bundle --platform=node --target=node18 --outfile=dist/main/index.js --external:electron-store --external:electron --log-level=info",
+    "build:preload": "esbuild electron/preload.ts --bundle --platform=node --target=node18 --outfile=dist/preload/index.js --external:electron --log-level=info",
+    "build:renderer": "esbuild src/index.tsx --bundle --target=es2020 --format=esm --outdir=dist/renderer --log-level=info --define:process.env.NODE_ENV='\"production\"' --jsx=automatic && node scripts/copy-static.mjs",
+    "dev": "cross-env NODE_ENV=development concurrently \"npm:dev:main\" \"npm:dev:preload\" \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev:main": "esbuild electron/main.ts --bundle --platform=node --target=node18 --outfile=dist/main/index.js --external:electron-store --external:electron --log-level=info --watch",
+    "dev:preload": "esbuild electron/preload.ts --bundle --platform=node --target=node18 --outfile=dist/preload/index.js --external:electron --log-level=info --watch",
+    "dev:renderer": "node scripts/copy-static.mjs && esbuild src/index.tsx --bundle --target=es2020 --format=esm --outdir=dist/renderer --log-level=info --define:process.env.NODE_ENV='\"development\"' --jsx=automatic --watch --servedir=dist",
+    "dev:electron": "wait-on dist/renderer/index.js && cross-env NODE_ENV=development electron .",
+    "lint": "echo 'No linters configured for Stage 0'",
+    "package": "npm run build && electron-builder --config electron-builder.json --win dir && node scripts/post-package-report.mjs"
+  },
+  "devDependencies": {
+    "@electron-toolkit/preload": "^3.0.2",
+    "@types/node": "^24.9.1",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^39.0.0",
+    "electron-builder": "^26.0.12",
+    "esbuild": "^0.25.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "wait-on": "^9.0.1"
+  },
+  "dependencies": {
+    "classnames": "^2.5.1",
+    "electron-store": "^11.0.2",
+    "immer": "^10.2.0",
+    "jotai": "^2.15.0",
+    "nanoid": "^5.1.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zustand": "^5.0.8"
+  }
+}
